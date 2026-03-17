@@ -1,0 +1,156 @@
+{
+  "name": "Chatbot Produk NFA dengan Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Anda adalah asisten virtual untuk NF Academy yang membantu calon peserta mencari informasi program pelatihan.\n\nTUGAS UTAMA:\n- Jawab pertanyaan tentang program pelatihan yang tersedia\n- Informasi mencakup: jenis program (Bootcamp/Skill Up), nama pelatihan, deskripsi, dan harga/biaya\n- Gunakan data dari Tool Google Sheets sebagai satu-satunya sumber informasi\n\nPANDUAN MENJAWAB:\n1. Jika ditanya \"program apa saja yang ada\" atau \"daftar pelatihan\", sebutkan semua nama pelatihan beserta jenisnya\n2. Jika ditanya harga tertentu (misal \"berapa harga bootcamp digital marketing\"), cari di data dan sebutkan harga yang sesuai\n3. Jika ditanya deskripsi program, jelaskan sesuai deskripsi di data\n4. Jika ada pertanyaan di luar data yang tersedia (misal jadwal, instruktur), katakan: \"Maaf, informasi tersebut belum tersedia di data saya. Silakan hubungi admin NF Academy untuk info lebih lanjut.\"\n5. Selalu berikan jawaban yang ramah dan informatif\n\nDATA YANG TERSEDIA:\n- Bootcamp: Digital Marketing, Network Engineering, Web Development, Mobile Programming, Codeless Data Science, DevOps Engineer (masing-masing Rp 15.000.000)\n- Skill Up: Video Editing, Python Programming, PHP Programming, Laravel Framework, Linux Administration, Mikrotik Network, ISO 27001, Office Application, Digital Marketing Web & SEO (harga bervariasi Rp 1.700.000 - Rp 3.500.000)\n\nJika ditanya tentang jadwal, instruktur, atau informasi di luar data yang tersedia, katakan: \"Maaf, informasi tersebut belum ada di database saya. Silakan hubungi admin NF Academy untuk info lebih lanjut.\"\n\nFormat jawaban harga selalu dalam Rupiah (contoh: Rp 15.000.000).\n\nGunakan tool Google Sheets untuk mengakses data lengkapnya."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        288,
+        0
+      ],
+      "id": "ca560dee-5516-4931-80d8-c0caa432359f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        224,
+        224
+      ],
+      "id": "a69d72bc-9b91-49e4-a234-e9d2da824787",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3OBWfot8BYaFW7Rz",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        224
+      ],
+      "id": "aa3326f6-d4c3-43a4-9d77-79821c20f2c5",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1jGupBkkhJcyoq00V4aEtjC9nz4PzT9UHj0GUVw641xA/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        224
+      ],
+      "id": "b2a80c51-5129-42ab-a043-6c5ee52466ef",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LauqsMjCROoTyI1B",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is NF Academy. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        16,
+        16
+      ],
+      "id": "b1b2f3a6-01b4-4927-b81b-fe8cd59dc999",
+      "name": "When chat message received",
+      "webhookId": "4a49b3c7-c5bd-4aa4-b324-90c509b4db77"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "cd53d767-cb94-44ac-a9a4-ffbe65920470",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fb25e49d725d67953ce7e4b51d74d4f148da0e6fa9f7e30ceede561d4fe4802"
+  },
+  "id": "dS3FYyOAVVi5gF2H",
+  "tags": []
+}
